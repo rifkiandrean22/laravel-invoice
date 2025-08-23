@@ -1,0 +1,26 @@
+use App\Models\User;
+$user = User::where('email', 'rifkiandrean@gmail.com')->first();
+$user->password = bcrypt('qwer12345678');
+$user->save();
+
+use App\Models\User;
+$user = User::where('email', 'thoriq@gmail.com')->first();
+$user->password = bcrypt('qwer12345678');
+$user->save();
+
+
+git init
+git add .
+git commit -m "first commit"
+git branch -M main
+git remote add origin https://github.com/rifkiandrean22/laravel-invoice.git
+git push -u origin main
+
+
+git config --global user.email "rifkiandrean@gmail.com"
+
+
+ps : LiNxVbBx0O
+
+
+if0_39763887_laravel	if0_39763887	(Your vPanel Password)	sql100.infinityfree.com

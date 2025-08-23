@@ -2,38 +2,65 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Invoice {{ $invoice->invoice_number }}</title>
+    <title>Invoice #{{ $invoice->id }}</title>
     <style>
-        body { font-family: sans-serif; }
-        .header { text-align: center; }
-        .table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        .table th, .table td { border: 1px solid #ddd; padding: 8px; }
+        body { font-family: DejaVu Sans, sans-serif; font-size: 12px; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .company { font-weight: bold; font-size: 18px; }
+        .invoice-details { margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #000; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .total { font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="header">
-        <h2>Invoice #{{ $invoice->invoice_number }}</h2>
-        <p>Date: {{ $invoice->invoice_date->format('d-m-Y') }}</p>
+        <div class="company">My Company</div>
+        <div>Invoice #{{ $invoice->id }}</div>
+        <div>{{ $invoice->created_at->format('d M Y') }}</div>
     </div>
 
-    <p><strong>Customer:</strong> {{ $invoice->customer_name }}</p>
+    <div class="invoice-details">
+        <strong>Customer:</strong> {{ $invoice->customer_name }} <br>
+        <strong>Keterangan Pembayaran:</strong> {{ $invoice->payment_note }} <br>
+        <strong>Status:</strong> {{ ucfirst($invoice->status) }}
+    </div>
 
-    <table class="table">
-        <tr>
-            <th>Description</th>
-            <th>Amount</th>
-        </tr>
-<p>
-    <strong>Invoice #:</strong> {{ $invoice->invoice_number }}<br>
-    <strong>Date:</strong> {{ $invoice->invoice_date->format('d-m-Y') }}<br>
-    <strong>Category:</strong> {{ ucfirst($invoice->category) }}
-</p>
-        <tr>
-            <td>Invoice Payment</td>
-            <td>Rp {{ number_format($invoice->amount, 0, ',', '.') }}</td>
-        </tr>
+    <table>
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Qty</th>
+                <th>Price</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{-- Jika ada relasi items --}}
+            @foreach($invoice->items ?? [] as $item)
+            <tr>
+                <td>{{ $item->name }}</td>
+                <td>{{ $item->quantity }}</td>
+                <td>{{ number_format($item->price, 2) }}</td>
+                <td>{{ number_format($item->total, 2) }}</td>
+            </tr>
+            @endforeach
+            {{-- Total --}}
+            <tr>
+                <td colspan="3" class="total">Total</td>
+                <td class="total">{{ number_format($invoice->total, 2) }}</td>
+            </tr>
+        </tbody>
     </table>
 
-    <p><strong>Status:</strong> {{ ucfirst($invoice->status) }}</p>
+    <div style="margin-top: 20px;">
+        <strong>Tanda Bukti Pembayaran:</strong><br>
+        @if($invoice->payment_proof)
+            <img src="{{ storage_path('app/public/payment-proofs/'.$invoice->payment_proof) }}" width="150">
+        @else
+            Tidak ada bukti pembayaran
+        @endif
+    </div>
 </body>
 </html>
