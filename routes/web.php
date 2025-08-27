@@ -14,8 +14,9 @@ Route::get('/admin/signup', [FilamentRegisterController::class, 'showForm'])->na
 Route::post('/admin/signup', [FilamentRegisterController::class, 'register'])->name('filament.signup.submit');
 
 
+
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('landing');
-});
+Route::get('/admin-dashboard', function () {
+    return view('admin.dashboard');
+})->middleware('auth', 'kategori:admin,direktur,manager,accounting,purchasing,staff');

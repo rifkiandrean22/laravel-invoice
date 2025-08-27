@@ -15,9 +15,22 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class PostResource extends Resource
 {
+
+    public static function canViewAny(): bool
+{
+    return in_array(auth()->user()->kategori, ['admin', 'direktur', 'manager', 'purchasing', 'accounting', 'staff']);
+}
+public static function canCreate(): bool
+{
+    return auth()->user()->kategori === 'admin';
+}
+public static function canEdit($record): bool
+{
+    return auth()->user()->kategori === 'admin';
+}
     protected static ?string $model = Post::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-ellipsis';
 
     public static function form(Form $form): Form
     {

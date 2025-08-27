@@ -22,12 +22,29 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\FileUpload;
 
+
+
+
 class InvoiceResource extends Resource
 {
+
+    public static function canViewAny(): bool
+{
+    return in_array(auth()->user()->kategori, ['admin', 'direktur', 'manager']);
+}
+public static function canCreate(): bool
+{
+    return auth()->user()->kategori === 'admin';
+}
+public static function canEdit($record): bool
+{
+    return auth()->user()->kategori === 'admin';
+}
     protected static ?string $model = Invoice::class;
-
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-
+    protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
+    protected static ?string $navigationGroup = 'Sales';
+    protected static ?int $navigationSort = 1; // Cash & Bank
+    
     public static function form(Form $form): Form
 {
     return $form
@@ -48,7 +65,15 @@ class InvoiceResource extends Resource
     })
     ->disabled()        // supaya user tidak bisa edit
     ->dehydrated(false), // jangan ikut mass-assign
-   
+    
+    DatePicker::make('invoice_date')
+        ->label('Tanggal')
+        ->required(),
+    
+    TextInput::make('name')
+        ->label('Pelanggan')
+        ->required(),
+
 		Repeater::make('invoice_items')
 			->label('Item Invoice')
 			->relationship('items')
@@ -68,12 +93,10 @@ class InvoiceResource extends Resource
     ])
 				->columnSpan('full'),
 
-            DatePicker::make('invoice_date')
-                ->label('Tanggal')
-                ->required(),
-
             TextInput::make('customer_name')
-                ->label('Pelanggan')
+                ->label('Dibuat Oleh')
+                ->default(fn () => auth()->user()->name) // otomatis terisi nama login
+                ->disabled() // opsional, kalau tidak mau user ubah
                 ->required(),
 
             Select::make('status')
@@ -127,19 +150,18 @@ class InvoiceResource extends Resource
                 ->label('Customer')
                 ->sortable()
                 ->searchable(),
-				
-            TextColumn::make('payment_note')
-			->label('Pembayaran')
-                ->limit(50),
-				
+
             TextColumn::make('category')
                 ->label('Category')
                 ->sortable()
                 ->sortable(),
-			Tables\Columns\TextColumn::make('payment_note')->label('Keterangan Pembayaran')->limit(50),
+
+			Tables\Columns\TextColumn::make('payment_note')
+            ->label('Pembayaran')
+            ->limit(50),
             
             IconColumn::make('payment_proof')
-                ->label('Bukti Pembayaran')
+                ->label('Bukti')
                 ->boolean() // true/false sesuai ada/tidak
                 ->trueIcon('heroicon-o-check') // icon ketika ada bukti
                 ->falseIcon('heroicon-o-x')   // icon ketika kosong
@@ -168,7 +190,7 @@ class InvoiceResource extends Resource
         ->actions([
          
             Tables\Actions\Action::make('download')
-                ->url(fn ($record) => route('invoice.download', $record->id))
+                ->url(fn ($record)=> route('invoice.download', $record->id))
                 ->openUrlInNewTab()
                 ->icon('heroicon-o-arrow-down-tray'),
         ])

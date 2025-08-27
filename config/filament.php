@@ -98,4 +98,8 @@ return [
 
     'system_route_prefix' => 'filament',
 
+    'providers' => [
+    App\Providers\Filament\AdminPanelProvider::class,
+    ],
+
 ];

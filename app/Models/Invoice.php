@@ -39,7 +39,7 @@ protected $casts = [
         'invoice_date' => 'date',
     ];
 
-protected static function boot()
+public static function boot()
     {
         parent::boot();
 
